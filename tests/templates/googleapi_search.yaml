@@ -1,0 +1,36 @@
+# JINJA2 Format
+
+type: googleapi
+method: GET
+url: https://www.googleapis.com/customsearch/v1/
+
+pagination:
+  request_field:
+    type: params
+    target: nextPage
+
+  response_field: queries.nextPage.0.startIndex
+  total_page: 3
+  merge_field: data
+
+request:
+  params:
+    q: '{{query}}'
+    cx: '{{cx|default("e52f2bd62dd124bf7", true)}}'
+    nextPage: {{cursor|default(0, true)|int}}
+
+response:
+  type: json
+  $schema:
+    data:
+      type: list
+      target: items
+      default: []
+      $schema:
+        link:
+          type: str
+          target: link
+          default: ''
+
+throw_error: false
+retry: 0
