@@ -2,5 +2,5 @@
   "python.testing.unittestArgs": ["--rootdir", "${workspaceFolder}", "-v", "-s", "./tests", "-p", "test_*.py"],
   "python.testing.pytestEnabled": false,
   "python.testing.unittestEnabled": true,
-  "cSpell.words": ["fuongz"]
+  "cSpell.words": ["fuongz", "reqs"]
 }

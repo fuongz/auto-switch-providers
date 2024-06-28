@@ -1,4 +1,5 @@
 __title__ = "auto-switch-providers"
+__description__ = "Auto Switch Providers"
 __url__ = "https://github.com/fuongz/auto-switch-providers"
 __version__ = "0.0.2"
 __author__ = "fuongz"

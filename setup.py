@@ -1,30 +1,29 @@
+import os
 from pathlib import Path
-import re
 
 from setuptools import find_packages, setup
 
 
+about = {}
 here = Path(__file__).parent.resolve()
+
 long_description = (here / "README.md").read_text(encoding="utf-8")
+
 with open(here / "requirements.txt") as fp:
     install_reqs = [r.rstrip() for r in fp.readlines() if not r.startswith("#")]
 
-
-def get_version():
-    file = here / "src/auto_switch_providers/__init__.py"
-    return re.search(
-        r'^__version__ = [\'"]([^\'"]*)[\'"]', file.read_text(), re.M
-    ).group(1)
+with open(here / "src/auto_switch_providers/__version__.py", "r") as f:
+    exec(f.read(), about)
 
 
 setup(
-    name="auto-switch-providers",
-    version=get_version(),
-    description="Auto Switch Providers.",
+    name=about["__title__"],
+    version=about["__version__"],
+    description=about["__description__"],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="fuongz",
-    author_email="hi@phuongphung.com",
+    author=about["__author__"],
+    author_email=about["__author_email__"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -41,8 +40,8 @@ setup(
         "Bug Reports": "https://github.com/fuongz/auto-switch-providers/issues",
         "Source": "https://github.com/fuongz/auto-switch-providers",
     },
-    license="MIT",
-    packages=find_packages(),
+    license=about["__license__"],
+    packages=find_packages("src", exclude=["tests"]),
     package_dir={"": "src"},
     include_package_data=True,
     python_requires=">=3.8, <4",

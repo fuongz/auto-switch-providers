@@ -30,6 +30,7 @@ class AutoSwitchProviders:
                 template: dict = safe_load(provider.get("template").render(data))
             except Exception as e:
                 print(f"⛔️ error - {dumps(data)}")
+                print(e)
                 continue
 
             template_type = template.get("type") or None
@@ -100,7 +101,7 @@ class AutoSwitchProviders:
         items = []
         page = 0
 
-        while page < config.get("total_page", 10) and has_more == True:
+        while page < config.get("total_page", 10) and has_more is True:
             page = page + 1
             if next_cursor:
                 if next_page_type in request and next_page_key in request.get(
