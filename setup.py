@@ -36,13 +36,15 @@ setup(
         "Programming Language :: Python :: 3.11",
     ],
     keywords="",
-    url="https://github.com/fuongz/auto_switch_providers",
+    url="https://github.com/fuongz/auto-switch-providers",
     project_urls={
-        "Bug Reports": "https://github.com/fuongz/auto_switch_providers/issues",
-        "Source": "https://github.com/fuongz/auto_switch_providers",
+        "Bug Reports": "https://github.com/fuongz/auto-switch-providers/issues",
+        "Source": "https://github.com/fuongz/auto-switch-providers",
     },
     license="MIT",
     packages=find_packages(),
+    package_dir={"": "src"},
+    include_package_data=True,
     python_requires=">=3.8, <4",
     install_requires=install_reqs,
 )
