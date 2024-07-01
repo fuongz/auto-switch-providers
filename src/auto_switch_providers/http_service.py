@@ -133,13 +133,13 @@ class HttpService(object):
                 if response.status_code == 200:
                     if self.cache_service is not None:
                         self.cache_service.client.hset(
-                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_url_query}",
+                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
                             "text",
                             dumps(response.text),
                         )
 
                         self.cache_service.client.hset(
-                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_url_query}",
+                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
                             "status_code",
                             dumps(response.status_code),
                         )
