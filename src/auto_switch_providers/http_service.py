@@ -92,7 +92,7 @@ class HttpService(object):
                     if "auth_key" in cache_params:
                         cache_params.pop("auth_key")
 
-                    cache_url_query = urlencode(params)
+                    cache_url_query = urlencode(params or {})
                     cache_path = base64encode(cache_params)
                     found = self.cache_service.client.exists(
                         f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}"
