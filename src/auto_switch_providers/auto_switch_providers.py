@@ -188,6 +188,16 @@ class AutoSwitchProviders:
             cur_schema_value_type: str = cur_schema_value.get("type", key)
             cur_schema_value_key: str = cur_schema_value.get("target", key)
             cur_schema_value_default: str = cur_schema_value.get("default", None)
+            cur_schema_value_allow_none: bool = False
+
+            if cur_schema_value.get("allow_none") and (
+                cur_schema_value.get("allow_none") == True
+                or cur_schema_value.get("allow_none") == 1
+                or cur_schema_value.get("allow_none") == "True"
+                or cur_schema_value.get("allow_none") == "true"
+                or cur_schema_value.get("allow_none") == "1"
+            ):
+                cur_schema_value_allow_none = True
 
             if cur_schema_value_type == "list":
                 list_item_schema: dict = cur_schema_value.get("$schema", {})
@@ -201,6 +211,7 @@ class AutoSwitchProviders:
                             i_key: fields.Raw(
                                 data_key=cur_schema_item_key,
                                 missing=cur_schema_item_default,
+                                allow_none=cur_schema_value_allow_none,
                             )
                         }
                     )
@@ -214,6 +225,7 @@ class AutoSwitchProviders:
                             ),
                             data_key=cur_schema_value_key,
                             missing=cur_schema_value_default,
+                            allow_none=cur_schema_value_allow_none,
                         )
                     }
                 )
@@ -223,6 +235,7 @@ class AutoSwitchProviders:
                         key: fields.Raw(
                             data_key=cur_schema_value_key,
                             missing=cur_schema_value_default,
+                            allow_none=cur_schema_value_allow_none,
                         )
                     }
                 )
