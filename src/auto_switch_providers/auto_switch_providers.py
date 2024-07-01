@@ -18,6 +18,7 @@ class AutoSwitchProviders:
         self.providers = []
         self.config = config or {}
         self.cache_config = cache_config or None
+        self.http_service = HttpService(cache_config=self.cache_config)
 
         if self.template_dir:
             self._discover_templates()
@@ -129,8 +130,7 @@ class AutoSwitchProviders:
         return merge_child(items)
 
     def _process(self, request: dict, template: dict, pagination_config: dict = None):
-        http_service = HttpService(cache_config=self.cache_config)
-        response = http_service.request(**request)
+        response = self.http_service.request(**request)
         cursor_response_target = (
             pagination_config.get("response_field") if pagination_config else None
         )
