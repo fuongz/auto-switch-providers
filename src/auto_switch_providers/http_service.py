@@ -1,11 +1,15 @@
-from json import dumps
+from json import dumps, loads
 import requests
+
+from .cache_service import CacheService
+from .utils.helpers import base64encode
 
 
 class HttpService(object):
     def __init__(
         self,
         config=None,
+        cache_config=None,
         base_url: str = None,
         default_headers=None,
         endpoints=None,
@@ -14,6 +18,10 @@ class HttpService(object):
         self.base_url = base_url if base_url is not None else ""
         self.default_headers = default_headers if default_headers is not None else {}
         self.endpoints = endpoints if endpoints is not None else {}
+        self.cache_service = None
+
+        if cache_config is not None:
+            self.cache_service = CacheService(cache_config)
 
     def _request(
         self,
@@ -66,6 +74,35 @@ class HttpService(object):
         for _ in range(total):
             try:
                 log_endpoint = self.base_url + (endpoint or "/")
+
+                # Check exists in cache
+                if self.cache_service is not None:
+                    cache_params = {**params} or {**body}
+                    if "api_key" in cache_params:
+                        cache_params.pop("api_key")
+                    if "auth_key" in cache_params:
+                        cache_params.pop("auth_key")
+
+                    cache_path = base64encode(cache_params)
+                    found = self.cache_service.client.exists(
+                        f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}"
+                    )
+                    if found:
+                        cached_response_text = self.cache_service.client.hget(
+                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
+                            "text",
+                        )
+                        cached_response_status_code = self.cache_service.client.hget(
+                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
+                            "status_code",
+                        )
+                        if int(cached_response_status_code) == 200:
+                            print(f"✅ [m] {log_endpoint}:{cache_path} (memory cache)")
+                            return {
+                                "text": loads(cached_response_text),
+                                "status_code": cached_response_status_code,
+                            }
+
                 response = self._request(
                     endpoint,
                     method=method,
@@ -80,6 +117,20 @@ class HttpService(object):
                         f"✅ [{response.elapsed.total_seconds() if response else None}s] {log_endpoint}:{log_endpoint} - retrying... ({_+1}) (code: wrong status_code)"
                     )
                     continue
+
+                if response.status_code == 200:
+                    if self.cache_service is not None:
+                        self.cache_service.client.hset(
+                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
+                            "text",
+                            dumps(response.text),
+                        )
+
+                        self.cache_service.client.hset(
+                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
+                            "status_code",
+                            dumps(response.status_code),
+                        )
 
                 if response.status_code == 400:
                     print(

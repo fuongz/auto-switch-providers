@@ -11,10 +11,13 @@ from .utils.helpers import merge_child, nested_dict_get
 
 
 class AutoSwitchProviders:
-    def __init__(self, template_dir: str, config: dict = {}) -> None:
+    def __init__(
+        self, template_dir: str, config: dict = {}, cache_config: dict = {}
+    ) -> None:
         self.template_dir = template_dir
         self.providers = []
         self.config = config or {}
+        self.cache_config = cache_config or None
 
         if self.template_dir:
             self._discover_templates()
@@ -126,14 +129,14 @@ class AutoSwitchProviders:
         return merge_child(items)
 
     def _process(self, request: dict, template: dict, pagination_config: dict = None):
-        http_service = HttpService()
+        http_service = HttpService(cache_config=self.cache_config)
         response = http_service.request(**request)
         cursor_response_target = (
             pagination_config.get("response_field") if pagination_config else None
         )
         next_cursor = None
         has_more = None
-        process_response = None
+        process_response = []
 
         # Response config
         response_config: dict = template.get("response")
@@ -141,7 +144,7 @@ class AutoSwitchProviders:
             return response
 
         response_type = response_config.get("type")
-        if response_type != "text":
+        if response_type != "text" and response:
             response_json = (
                 response.json()
                 if isinstance(response, Response)

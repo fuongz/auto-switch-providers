@@ -1,0 +1,40 @@
+# JINJA2 Format
+
+type: proxiesapi
+method: GET
+url: http://api.proxiesapi.com/google
+
+request:
+  params:
+    search: '{{query}}'
+    cc_code: '{{country_code|default("au", true)}}'
+    lc_code: '{{language|default("en", true)}}'
+    page: '{{page|default(1, true)}}'
+
+response:
+  type: json
+  $schema:
+    data:
+      type: list
+      target: organic_results
+      allow_none: True
+      default: []
+      $schema:
+        title:
+          type: str
+          target: title
+          default: ''
+          allow_none: True
+        description:
+          type: str
+          target: description
+          allow_none: True
+          default: ''
+        link:
+          type: str
+          target: url
+          default: ''
+          allow_none: True
+
+throw_error: false
+retry: 0
