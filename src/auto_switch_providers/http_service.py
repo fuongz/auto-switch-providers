@@ -77,7 +77,15 @@ class HttpService(object):
 
                 # Check exists in cache
                 if self.cache_service is not None:
-                    cache_params = {**params} or {**body}
+                    cache_params = {}
+
+                    if params:
+                        cache_params = {**cache_params, **params}
+                    if body:
+                        cache_params = {**cache_params, **body}
+                    if headers:
+                        cache_params = {**cache_params, **headers}
+
                     if "api_key" in cache_params:
                         cache_params.pop("api_key")
                     if "auth_key" in cache_params:
