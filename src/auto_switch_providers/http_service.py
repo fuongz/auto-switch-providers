@@ -71,6 +71,9 @@ class HttpService(object):
             endpoint = endpoint.format(**url_params_format)
 
         params_str = " - " + dumps(params) if params else ""
+        cache_url_query = urlencode(params or {})
+        if cache_url_query != "":
+            cache_url_query = f"?{cache_url_query}"
 
         for _ in range(total):
             try:
@@ -92,23 +95,23 @@ class HttpService(object):
                     if "auth_key" in cache_params:
                         cache_params.pop("auth_key")
 
-                    cache_url_query = urlencode(params or {})
                     cache_path = base64encode(cache_params)
-                    found = self.cache_service.client.exists(
-                        f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}"
-                    )
+                    found = self.cache_service.exists([log_endpoint, cache_path])
                     if found:
-                        cached_response_text = self.cache_service.client.hget(
-                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
+                        cached_response_text = self.cache_service.hget(
+                            [log_endpoint, cache_path],
                             "text",
                         )
-                        cached_response_status_code = self.cache_service.client.hget(
-                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
+                        cached_response_status_code = self.cache_service.hget(
+                            [log_endpoint, cache_path],
                             "status_code",
                         )
-                        if int(cached_response_status_code) == 200:
+                        if (
+                            cached_response_status_code
+                            and int(cached_response_status_code) == 200
+                        ):
                             print(
-                                f"✅ [m] {log_endpoint}?{cache_url_query} (memory cache)"
+                                f"✅ [memory] {method}: {log_endpoint}{cache_url_query} (memory cache)"
                             )
                             return {
                                 "text": loads(cached_response_text),
@@ -126,42 +129,42 @@ class HttpService(object):
 
                 if response.status_code in status_force_list:
                     print(
-                        f"✅ [{response.elapsed.total_seconds() if response else None}s] {log_endpoint}?{cache_url_query} - retrying... ({_+1}) (code: wrong status_code)"
+                        f"✅ [{response.elapsed.total_seconds() if response else None}s] {method}: {log_endpoint}{cache_url_query} - retrying... ({_+1}) (code: wrong status_code)"
                     )
                     continue
 
                 if response.status_code == 200:
                     if self.cache_service is not None:
-                        self.cache_service.client.hset(
-                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
+                        self.cache_service.hset(
+                            [log_endpoint, cache_path],
                             "text",
-                            dumps(response.text),
+                            response.text,
                         )
 
-                        self.cache_service.client.hset(
-                            f"auto_switch_module:http_cached:{log_endpoint}:{cache_path}",
+                        self.cache_service.hset(
+                            [log_endpoint, cache_path],
                             "status_code",
-                            dumps(response.status_code),
+                            response.status_code,
                         )
 
                 if response.status_code == 400:
                     print(
-                        f"🚸 [{timeout if timeout else None}s] {method}: {log_endpoint}?{cache_url_query} - stopped ({_+1}) (code: HTTPError) {params_str}"
+                        f"🚸 [{timeout if timeout else None}s] {method}: {log_endpoint}{cache_url_query} - stopped ({_+1}) (code: HTTPError) {params_str}"
                     )
                 else:
                     print(
-                        f"✅ [{response.elapsed.total_seconds() if response else None}s] GET: {log_endpoint}?{cache_url_query}"
+                        f"✅ [{response.elapsed.total_seconds() if response else None}s] {method}: {log_endpoint}{cache_url_query}"
                     )
 
                 return response
             except requests.exceptions.Timeout:
                 print(
-                    f"⛔️ [{timeout if timeout else None}] {method}: {log_endpoint}?{cache_url_query} - retrying... ({_+1}) (code: Timeout){params_str}"
+                    f"⛔️ [{timeout if timeout else None}] {method}: {log_endpoint}{cache_url_query} - retrying... ({_+1}) (code: Timeout){params_str}"
                 )
                 continue
             except requests.exceptions.ConnectionError:
                 print(
-                    f"⛔️ [{timeout if timeout else None}] {method}: {log_endpoint}?{cache_url_query} - stopped ({_+1}) (code: ConnectionError) {params_str}"
+                    f"⛔️ [{timeout if timeout else None}] {method}: {log_endpoint}{cache_url_query} - stopped ({_+1}) (code: ConnectionError) {params_str}"
                 )
                 pass
 

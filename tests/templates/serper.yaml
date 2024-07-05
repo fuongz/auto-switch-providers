@@ -1,0 +1,42 @@
+# JINJA2 Format
+
+type: serper
+method: POST
+url: https://google.serper.dev/search
+
+request:
+  body:
+    q: '{{query}}'
+    num: 100
+    gl: '{{country}}'
+  headers:
+    'Content-Type': 'application/json'
+    
+
+response:
+  type: json
+  $schema:
+    data:
+      type: list
+      target: organic
+      allow_none: True
+      default: []
+      $schema:
+        title:
+          type: str
+          target: title
+          default: ''
+          allow_none: True
+        description:
+          type: str
+          target: snippet
+          allow_none: True
+          default: ''
+        link:
+          type: str
+          target: link
+          default: ''
+          allow_none: True
+
+throw_error: false
+retry: 0
