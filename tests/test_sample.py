@@ -9,16 +9,12 @@ from src.auto_switch_providers.auto_switch_providers import AutoSwitchProviders
 TEMPLATE_CONFIG = {
     # "googleapi": {"http_service": {"params": {"key": ""}}},
     # "proxiesapi": {"http_service": {"params": {"auth_key": ""}}},
-    "serper": {
-        "http_service": {
-            "headers": {"X-API-KEY": "c50ed9f437790d262dfbe4e2bff5526ce1e2dcc5"}
-        }
-    },
+    "serper": {"http_service": {"headers": {"X-API-KEY": ""}}},
 }
 
 CACHE_CONFIG = {
     "host": "127.0.0.1",
-    "password": "r3d1s",
+    "password": "",
     "port": 6379,
     "database": "auto_switch_module:http_cached",
     "expires_in": 2592000,
