@@ -94,6 +94,8 @@ class HttpService(object):
                         cache_params.pop("api_key")
                     if "auth_key" in cache_params:
                         cache_params.pop("auth_key")
+                    if "X-API-KEY" in cache_params:
+                        cache_params.pop("X-API-KEY")
 
                     cache_path = base64encode(cache_params)
                     found = self.cache_service.exists([log_endpoint, cache_path])
